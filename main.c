@@ -126,6 +126,9 @@ void process_finger(struct Finger *f, struct timeval *t, int slot){
             multi_touch=false;
             return;
         }
+        if (multi_touch)
+            return;
+
         if (!enabled){
             return;
         }
