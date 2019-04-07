@@ -19,41 +19,41 @@ enum Key {Left=0,Right=1, Home=2};
 enum FingerStatus {Down=0,Up=1,Move=2};
 
 struct Finger {
-	int x;
-	int y;
-	enum FingerStatus status;
-	int track_id;
-	bool state; //0 unused, 1 used
+    int x;
+    int y;
+    enum FingerStatus status;
+    int track_id;
+    bool state; //0 unused, 1 used
 };
 
 //fd
 int buttons;
 
 void emit(enum Key eventType){
- 	struct input_event key_input_event;
+    struct input_event key_input_event;
     memset(&key_input_event, 0, sizeof(key_input_event));
     int f = buttons; //TODO: global vars
 
 
-	int code = 0;
-	switch (eventType) {
-		case Left:
-			code = 105;
-			break;
-		case Right:
-			code = 106;
-			break;
-		case Home:
-			code = 102;
-			break;
+    int code = 0;
+    switch (eventType) {
+        case Left:
+            code = 105;
+            break;
+        case Right:
+            code = 106;
+            break;
+        case Home:
+            code = 102;
+            break;
 
-	}
+    }
 
     // key press event for 'a'
     key_input_event.type = EV_KEY;
     key_input_event.code = code;
     key_input_event.value = 1;
-	write(f, &key_input_event,sizeof(key_input_event));
+    write(f, &key_input_event,sizeof(key_input_event));
 
     memset(&key_input_event, 0, sizeof(key_input_event));
     // EV_SYN for key press event
@@ -61,13 +61,13 @@ void emit(enum Key eventType){
     key_input_event.code = SYN_REPORT;
     key_input_event.value = 0;
 
-	write(f, &key_input_event,sizeof(key_input_event));
+    write(f, &key_input_event,sizeof(key_input_event));
 
     memset(&key_input_event, 0, sizeof(key_input_event));
     key_input_event.type = EV_KEY;
     key_input_event.code = code;
     key_input_event.value = 0;
-	write(f, &key_input_event,sizeof(key_input_event));
+    write(f, &key_input_event,sizeof(key_input_event));
 
 
     memset(&key_input_event, 0, sizeof(key_input_event));
@@ -76,7 +76,7 @@ void emit(enum Key eventType){
     key_input_event.code = SYN_REPORT;
     key_input_event.value = 0;
 
-	write(f, &key_input_event,sizeof(key_input_event));
+    write(f, &key_input_event,sizeof(key_input_event));
 }
 
 bool enabled = false;
@@ -90,7 +90,7 @@ struct Point segments[2];
 void process_finger(struct Finger *f, struct timeval *t, int slot){
     if (f->status == Down){
         printf("slot %d down x:%d, y:%d  \n", slot, f->x, f->y);
-        
+
         if(keys_down < 0) keys_down = 0; //todo: fixit
 
         keys_down++;
@@ -204,7 +204,7 @@ void process_touch(){
             } 
             else if (evt.code == ABS_MT_TRACKING_ID) {
                 if (slot == 0) {
-                     /* printf("TRACK\n"); */
+                    /* printf("TRACK\n"); */
                     fingers[slot].state = 1;
                     fingers[slot].status = Down;
                 }
@@ -222,7 +222,7 @@ void process_touch(){
             for (int i=0;i< MAX_SLOTS;i++){
                 f = &fingers[i];
                 if (f->state) {
-                    
+
                     process_finger(f, &evt.time, i);
 
                     if (f->status == Down) {
@@ -232,7 +232,7 @@ void process_touch(){
                     if (f->status == Up){
                         f->state = 0;
                     }
-                    
+
                 }
             }
 
@@ -241,7 +241,7 @@ void process_touch(){
 }
 
 int main(){
-    
+
     init();
 
     process_touch(); //TODO:function pointer
