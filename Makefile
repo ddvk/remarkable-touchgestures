@@ -1,4 +1,6 @@
-touchinjector: main.c
-	$(CC) -o touchinjector main.c
+TARGET=touchinjector
+
+$(TARGET): main.c
+	$(CC) -std=c99 -lm -o $@ main.c
 clean:
-	rm touchinjector
+	rm $(TARGET)

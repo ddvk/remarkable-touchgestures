@@ -1,0 +1,13 @@
+[Unit]
+Description=touch injector
+#StartLimitIntervalSec=600
+#StartLimitBurst=4
+After=home.mount
+
+[Service]
+ExecStart=/home/root/touchinjector
+
+[Install]
+WantedBy=multi-user.target
+
+
