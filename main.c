@@ -94,12 +94,15 @@ int keys_down = 0;
 int segment_count = 0;
 bool multi_touch = 0;
 
-
-struct Point { 
-    int x_start,y_start;
+struct Point {
     int x,y;
 };
-struct Point segments[2];
+
+struct Segment { 
+    struct Point start;
+    struct Point end;
+};
+struct Segment segments[2];
 
 void process_finger(struct TouchEvent *f){
     int slot = f->slot;
@@ -108,8 +111,8 @@ void process_finger(struct TouchEvent *f){
 
         if(keys_down < 0) keys_down = 0; //todo: fixit
         if (slot < 2){
-            segments[slot].x_start = f->x;
-            segments[slot].y_start = f->y;
+            segments[slot].start.x = f->x;
+            segments[slot].start.y = f->y;
         }
 
         keys_down++;
@@ -122,8 +125,8 @@ void process_finger(struct TouchEvent *f){
 
         keys_down--;
         if (slot < 2){
-            segments[slot].x = x;
-            segments[slot].y = y;
+            segments[slot].end.x = x;
+            segments[slot].end.y = y;
         }
 
 
@@ -136,9 +139,9 @@ void process_finger(struct TouchEvent *f){
                 segment_count=0;
 
                 printf("Tap  x:%d, y:%d \n", f->x, f->y);
-                struct Point *p = segments;
-                int dx = p->x_start - p->x;
-                int dy = p->y_start - p->y;
+                struct Segment *p = segments;
+                int dx = p->end.x - p->start.x;
+                int dy = p->end.y - p->start.y;
 
 
                 if (touch_enabled){
@@ -177,8 +180,8 @@ void process_finger(struct TouchEvent *f){
             }
             else if(segment_count == 2){ //2 tap
                 segment_count=0;
-                int dx = segments[0].x - segments[1].x;
-                int dy = segments[0].y - segments[1].y;
+                int dx = segments[0].end.x - segments[1].end.x;
+                int dy = segments[0].end.y - segments[1].end.y;
                 int distance = sqrt(dx*dx+dy*dy);
                 if (distance > 500) {
                     if (touch_enabled){
