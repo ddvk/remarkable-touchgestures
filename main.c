@@ -135,7 +135,7 @@ void process_finger(struct TouchEvent *f){
                 
                 segment_count=0;
 
-                debug_print("tap slot %d x:%d, y:%d  \n", slot, f->x, f->y);
+                printf("Tap  x:%d, y:%d \n", f->x, f->y);
                 struct Point *p = segments;
                 int dx = p->x_start - p->x;
                 int dy = p->y_start - p->y;
@@ -146,7 +146,7 @@ void process_finger(struct TouchEvent *f){
                         abs(dy) < JITTER){
 
                         int nav_stripe = SCREEN_WIDTH /3;
-                        if (x < nav_stripe) { 
+                        if (x < nav_stripe && y > 100) { //disable upper left corner (menu button) 
                             printf("Back\n");
                             emit(Left);
                         }
