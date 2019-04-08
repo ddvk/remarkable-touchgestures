@@ -1,3 +1,6 @@
 #!/bin/sh
-make && scp bin/touchinjector root@remarkable:~/
-# ssh root@remarkable "~/touchinjector"
+DEVICE=rm
+make &&
+ssh root@$DEVICE killall touchinjector ||
+scp bin/touchinjector root@$DEVICE:~/ && 
+ssh -tt root@$DEVICE '/home/root/touchinjector'

@@ -7,17 +7,35 @@
 #include <math.h>
 #include <stdbool.h>
 
+#define VERSION "0.0.1"
 #define TOUCHSCREEN "/dev/input/event1"
 #define BUTTONS "/dev/input/event2"
-#define MAX_SLOTS 5 
+
+#define MAX_SLOTS 5  //max touch points to track
+#define MULTITOUCH_DISTANCE 500 //distance between the fingers to enable disable
+
 #define SCREEN_WIDTH 1404 
 #define SCREEN_HEIGHT 1872
 
+#define TOUCH_WIDTH 767
+#define TOUCH_HEIGHT 1023
+#define JITTER 20 //finger displacement to be consideded a swipe
 
-enum Key {Left=0,Right=1, Home=2};
+#define DEBUG 0
+#define debug_print(fmt, ...) \
+            do { if (DEBUG) fprintf(stderr, fmt, __VA_ARGS__); } while (0)
+
+enum Key {Left, Right, Home};
 
 enum FingerStatus {Down=0,Up=1,Move=2};
 
+struct TouchEvent{
+    int x,y,slot;
+    long time;
+    enum FingerStatus status;
+};
+
+//todo: rename to touch point or something
 struct Finger {
     int x;
     int y;
@@ -28,12 +46,12 @@ struct Finger {
 
 //fd
 int buttons;
-
 void emit(enum Key eventType){
     struct input_event key_input_event;
     memset(&key_input_event, 0, sizeof(key_input_event));
     int f = buttons; //TODO: global vars
 
+    debug_print("emitting %d \n", eventType);
 
     int code = 0;
     switch (eventType) {
@@ -49,57 +67,56 @@ void emit(enum Key eventType){
 
     }
 
-    // key press event for 'a'
     key_input_event.type = EV_KEY;
     key_input_event.code = code;
     key_input_event.value = 1;
     write(f, &key_input_event,sizeof(key_input_event));
 
     memset(&key_input_event, 0, sizeof(key_input_event));
-    // EV_SYN for key press event
     key_input_event.type = EV_SYN;
     key_input_event.code = SYN_REPORT;
-    key_input_event.value = 0;
-
     write(f, &key_input_event,sizeof(key_input_event));
 
     memset(&key_input_event, 0, sizeof(key_input_event));
     key_input_event.type = EV_KEY;
     key_input_event.code = code;
-    key_input_event.value = 0;
     write(f, &key_input_event,sizeof(key_input_event));
 
 
     memset(&key_input_event, 0, sizeof(key_input_event));
-    // EV_SYN for key press event
     key_input_event.type = EV_SYN;
     key_input_event.code = SYN_REPORT;
-    key_input_event.value = 0;
-
     write(f, &key_input_event,sizeof(key_input_event));
 }
 
-bool enabled = false;
+bool touch_enabled = false;
 int keys_down = 0;
+int segment_count = 0;
 bool multi_touch = 0;
 
 
-struct Point { int x,y;};
+struct Point { 
+    int x_start,y_start;
+    int x,y;
+};
 struct Point segments[2];
 
-void process_finger(struct Finger *f, struct timeval *t, int slot){
+void process_finger(struct TouchEvent *f){
+    int slot = f->slot;
     if (f->status == Down){
-        printf("slot %d down x:%d, y:%d  \n", slot, f->x, f->y);
+        debug_print("slot %d down x:%d, y:%d  \n", slot, f->x, f->y);
 
         if(keys_down < 0) keys_down = 0; //todo: fixit
+        if (slot < 2){
+            segments[slot].x_start = f->x;
+            segments[slot].y_start = f->y;
+        }
 
         keys_down++;
-        if (keys_down>1){
-            multi_touch= true;
-        }
+        segment_count++;
     }
     else if (f->status == Up){
-        printf("slot %d up x:%d, y:%d  \n", slot, f->x, f->y);
+        debug_print("slot %d up x:%d, y:%d segments:%d \n", slot, f->x, f->y, segment_count);
         int x = f->x;
         int y = f->y;
 
@@ -110,38 +127,70 @@ void process_finger(struct Finger *f, struct timeval *t, int slot){
         }
 
 
-        if(multi_touch && keys_down == 0){
-            int dx = segments[0].x - segments[1].x;
-            int dy = segments[0].y - segments[1].y;
-            int distance = sqrt(dx*dx+dy*dy);
-            if (distance > 500) {
-                if (enabled){
-                    printf("disabling\n");
+        //todo: extract gesture recognition
+
+        if(keys_down == 0){
+            //single tap
+            if (segment_count == 1) {
+                
+                segment_count=0;
+
+                debug_print("tap slot %d x:%d, y:%d  \n", slot, f->x, f->y);
+                struct Point *p = segments;
+                int dx = p->x_start - p->x;
+                int dy = p->y_start - p->y;
+
+
+                if (touch_enabled){
+                    if (abs(dx) < JITTER &&
+                        abs(dy) < JITTER){
+
+                        int nav_stripe = SCREEN_WIDTH /3;
+                        if (x < nav_stripe) { 
+                            printf("Back\n");
+                            emit(Left);
+                        }
+                        else if (x > nav_stripe*2) {
+                            printf("Next\n");
+                            emit(Right);
+                        }
+                    }
+                    else {
+                        //swipe 
+                        if (abs(dx) > abs(dy)) {
+                            //horizontal
+                            if (dx < 0) {
+                                printf("swipe left\n","");
+                                //todo: output gestures, extract executer
+                                emit(Right);
+                            }
+                            else {
+                                printf("swipe right\n","");
+                                emit(Left);
+                            }
+                        }
+                        else {
+                            //vertical
+                        }
+                    }
                 }
-                else {
-                    printf("enabling\n");
-                }
-                enabled = !enabled;
             }
-            multi_touch=false;
-            return;
-        }
-        if (multi_touch)
-            return;
-
-        if (!enabled){
-            return;
-        }
-        printf("slot %d x:%d, y:%d  \n", slot, f->x, f->y);
-
-        int nav_stripe = SCREEN_WIDTH /3;
-        if (x < nav_stripe) { 
-            printf("Back\n");
-            emit(Left);
-        }
-        else if (x > nav_stripe*2) {
-            printf("Next\n");
-            emit(Right);
+            else if(segment_count == 2){ //2 tap
+                segment_count=0;
+                int dx = segments[0].x - segments[1].x;
+                int dy = segments[0].y - segments[1].y;
+                int distance = sqrt(dx*dx+dy*dy);
+                if (distance > 500) {
+                    if (touch_enabled){
+                        printf("disabling\n");
+                    }
+                    else {
+                        printf("enabling\n");
+                    }
+                    touch_enabled = !touch_enabled;
+                }
+            }
+            segment_count=0;
         }
     }
 }
@@ -154,15 +203,16 @@ void init() {
     }
 }
 
-void process_touch(){
+
+void process_touch(void(*process)(struct TouchEvent *)){
     struct input_event evt;
 
     int slot = 0;
     int x,y = 0;
-    int scr_width = 1404;
-    int scr_height = 1872;
-    int width = 767;
-    int height = 1023;
+    int scr_width = SCREEN_WIDTH;
+    int scr_height = SCREEN_HEIGHT;
+    int width = TOUCH_WIDTH;
+    int height = TOUCH_HEIGHT;
     int pos = 0;
 
     struct Finger fingers[MAX_SLOTS];
@@ -173,6 +223,7 @@ void process_touch(){
         fprintf(stderr, "cannot open touchscreen");
         exit(1);
     }
+
     while(read(touchscreen,&evt, sizeof(evt))){
         if (evt.type == EV_ABS) {
             if (evt.code == ABS_MT_SLOT) {
@@ -226,7 +277,14 @@ void process_touch(){
                 f = &fingers[i];
                 if (f->state) {
 
-                    process_finger(f, &evt.time, i);
+                    struct TouchEvent event;
+                    event.time = evt.time.tv_sec;
+                    event.slot = i; //enumerating slots
+                    event.x = f->x;
+                    event.y = f->y;
+                    event.status = f->status;
+
+                    process(&event);
 
                     if (f->status == Down) {
                         f->status = Move;
@@ -243,11 +301,12 @@ void process_touch(){
     }
 }
 
-int main(){
+int main() {
+    printf("touchinjector %s\n",VERSION);
 
     init();
 
-    process_touch(); //TODO:function pointer
+    process_touch(&process_finger);
 
     return 0;
 }
