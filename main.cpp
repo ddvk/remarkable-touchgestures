@@ -6,6 +6,10 @@
 #include <fcntl.h>
 #include <math.h>
 #include <stdbool.h>
+#include <QGuiApplication>
+#include <QPainter>
+#include <QImage>
+#include <epframebuffer.h>
 
 #define VERSION "0.0.1"
 #define TOUCHSCREEN "/dev/input/event1"
@@ -35,6 +39,17 @@ struct TouchEvent{
     enum FingerStatus status;
 };
 
+void show(const char *str){
+	QPainter painter(EPFrameBuffer::framebuffer());
+	int x = SCREEN_WIDTH / 3;
+	int y = SCREEN_HEIGHT - 20;
+	QRect rect(x - 50,y - 50, 600, 100);
+	painter.eraseRect(rect);
+	painter.drawText(x,y, str);
+	painter.end();
+	EPFrameBuffer::sendUpdate(rect, EPFrameBuffer::Grayscale, EPFrameBuffer::PartialUpdate);
+}
+
 //todo: rename to touch point or something
 struct Finger {
     int x;
@@ -46,7 +61,7 @@ struct Finger {
 
 //fd
 int buttons;
-void emit(enum Key eventType){
+void myemit(Key eventType){
     struct input_event key_input_event;
     memset(&key_input_event, 0, sizeof(key_input_event));
     int f = buttons; //TODO: global vars
@@ -151,11 +166,11 @@ void process_finger(struct TouchEvent *f){
                         int nav_stripe = SCREEN_WIDTH /3;
                         if (x < nav_stripe && y > 100) { //disable upper left corner (menu button) 
                             printf("Back\n");
-                            emit(Left);
+                            myemit(Left);
                         }
                         else if (x > nav_stripe*2) {
                             printf("Next\n");
-                            emit(Right);
+                            myemit(Right);
                         }
                     }
                     else {
@@ -163,13 +178,13 @@ void process_finger(struct TouchEvent *f){
                         if (abs(dx) > abs(dy)) {
                             //horizontal
                             if (dx < 0) {
-                                printf("swipe left\n","");
+                                printf("swipe left\n");
                                 //todo: output gestures, extract executer
-                                emit(Right);
+                                myemit(Right);
                             }
                             else {
-                                printf("swipe right\n","");
-                                emit(Left);
+                                printf("swipe right\n");
+                                myemit(Left);
                             }
                         }
                         else {
@@ -185,12 +200,15 @@ void process_finger(struct TouchEvent *f){
                 int distance = sqrt(dx*dx+dy*dy);
                 if (distance > 500) {
                     if (touch_enabled){
+						show("touch navigation disabled");
                         printf("disabling\n");
+						touch_enabled = false;
                     }
                     else {
+						show("touch navigation enabled");
                         printf("enabling\n");
+						touch_enabled = true;
                     }
-                    touch_enabled = !touch_enabled;
                 }
             }
             segment_count=0;
@@ -216,7 +234,6 @@ void process_touch(void(*process)(struct TouchEvent *)){
     int scr_height = SCREEN_HEIGHT;
     int width = TOUCH_WIDTH;
     int height = TOUCH_HEIGHT;
-    int pos = 0;
 
     struct Finger fingers[MAX_SLOTS];
     memset(fingers,0,sizeof(fingers));
@@ -304,11 +321,17 @@ void process_touch(void(*process)(struct TouchEvent *)){
     }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
     printf("touchinjector %s\n",VERSION);
 
     init();
 
+	qputenv("QMLSCENE_DEVICE", "epaper");
+    qputenv("QT_QPA_PLATFORM", "epaper:enable_fonts");
+    qputenv("QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS", "rotate=180");
+	qputenv("QT_QPA_GENERIC_PLUGINS", "evdevtablet");
+
+	QGuiApplication app(argc, argv);
     process_touch(&process_finger);
 
     return 0;
