@@ -13,7 +13,7 @@
 #define BUTTONS "/dev/input/event2"
 #define WACOM "/dev/input/event0"
 
-#define MAX_SLOTS 5  //max touch points to track
+#define MAX_SLOTS 7  //max touch points to track
 #define MULTITOUCH_DISTANCE 500 //distance between the fingers to enable disable
 
 
@@ -94,7 +94,7 @@ struct Segment {
     struct Point start;
     struct Point end;
 };
-struct Segment segments[2];
+struct Segment segments[MAX_SLOTS+1];
 
 void process_finger(struct TouchEvent *f){
     int slot = f->slot;
@@ -102,10 +102,8 @@ void process_finger(struct TouchEvent *f){
         debug_print("slot %d down x:%d, y:%d  \n", slot, f->x, f->y);
 
         if(keys_down < 0) keys_down = 0; //todo: fixit
-        if (slot < 2){
-            segments[slot].start.x = f->x;
-            segments[slot].start.y = f->y;
-        }
+        segments[slot].start.x = f->x;
+        segments[slot].start.y = f->y;
 
         keys_down++;
         segment_count++;
@@ -116,24 +114,20 @@ void process_finger(struct TouchEvent *f){
         int y = f->y;
 
         keys_down--;
-        if (slot < 2){
-            segments[slot].end.x = x;
-            segments[slot].end.y = y;
-        }
+        segments[slot].end.x = x;
+        segments[slot].end.y = y;
 
         //todo: extract gesture recognition
 
         if(keys_down == 0){
-            //single tap
-            if (segment_count == 1) {
-                
-                segment_count=0;
-
+            struct Segment *p = segments;
+            int dx,dy,distance=0;
+            switch(segment_count){
+                //single tap
+                case 1: 
                 printf("Tap  x:%d, y:%d  raw_x:%d, raw_y:%d\n", f->x, f->y, f->raw_position.x, f->raw_position.y);
-                struct Segment *p = segments;
-                int dx = p->end.x - p->start.x;
-                int dy = p->end.y - p->start.y;
-
+                dx = p->end.x - p->start.x;
+                dy = p->end.y - p->start.y;
 
                 if (touch_enabled){
                     if (abs(dx) < JITTER &&
@@ -142,7 +136,7 @@ void process_finger(struct TouchEvent *f){
                         int nav_stripe = SCREEN_WIDTH /3;
 						if (y > 100){//disable upper stripe 
 							if (x < nav_stripe) { 
-								if (y > SCREEN_WIDTH - SCREEN_HEIGHT/5) {
+								if (y > SCREEN_HEIGHT - 150 && x < 150) {
 									printf("TOC\n");
 								}
 								else {
@@ -182,12 +176,11 @@ void process_finger(struct TouchEvent *f){
                         }
                     }
                 }
-            }
-            else if(segment_count == 2){ //2 tap
-                segment_count=0;
-                int dx = segments[0].end.x - segments[1].end.x;
-                int dy = segments[0].end.y - segments[1].end.y;
-                int distance = sqrt(dx*dx+dy*dy);
+                break;
+            case 2:
+                dx = segments[0].end.x - segments[1].end.x;
+                dy = segments[0].end.y - segments[1].end.y;
+                distance = sqrt(dx*dx+dy*dy);
                 if (distance > 500) {
                     if (touch_enabled){
 						show("touch navigation disabled");
@@ -200,6 +193,12 @@ void process_finger(struct TouchEvent *f){
 						touch_enabled = true;
                     }
                 }
+            case 3:
+                printf("3 finger tap\n");
+                break;
+            case 4:
+                printf("4\n");
+                break;
             }
             segment_count=0;
         }
@@ -225,7 +224,7 @@ void process_touch(void(*process)(struct TouchEvent *)){
     int width = TOUCH_WIDTH;
     int height = TOUCH_HEIGHT;
 
-    struct Finger fingers[MAX_SLOTS];
+    struct Finger fingers[MAX_SLOTS+1];
     memset(fingers,0,sizeof(fingers));
 
     int touchscreen = open(TOUCHSCREEN, O_RDONLY);
