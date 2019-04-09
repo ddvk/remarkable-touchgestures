@@ -48,8 +48,10 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = main.cpp 
-OBJECTS       = main.o
+SOURCES       = main.cpp \
+		ui.cpp 
+OBJECTS       = main.o \
+		ui.o
 DIST          = /opt/poky/2.1.3/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/features/spec_pre.prf \
 		/opt/poky/2.1.3/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/common/unix.conf \
 		/opt/poky/2.1.3/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/common/linux.conf \
@@ -127,7 +129,8 @@ DIST          = /opt/poky/2.1.3/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/
 		/opt/poky/2.1.3/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/features/exceptions.prf \
 		/opt/poky/2.1.3/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/features/yacc.prf \
 		/opt/poky/2.1.3/sysroots/cortexa9hf-neon-poky-linux-gnueabi/usr/lib/qt5/mkspecs/features/lex.prf \
-		remarkable-touchgestures.pro  main.cpp
+		remarkable-touchgestures.pro  main.cpp \
+		ui.cpp
 QMAKE_TARGET  = touchinjector
 DESTDIR       = bin/
 TARGET        = bin/touchinjector
@@ -315,7 +318,7 @@ dist: distdir FORCE
 distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
-	$(COPY_FILE) --parents main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents main.cpp ui.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -356,6 +359,9 @@ compiler_clean:
 
 main.o: main.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
+
+ui.o: ui.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o ui.o ui.cpp
 
 ####### Install
 

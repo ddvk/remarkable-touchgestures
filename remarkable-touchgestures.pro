@@ -9,5 +9,6 @@ CONFIG   += c++11
 INCLUDEPATH += .
 
 # Input
-SOURCES += main.cpp
+SOURCES += main.cpp \ 
+			ui.cpp
 LIBS += -lqsgepaper
