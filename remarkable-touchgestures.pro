@@ -3,7 +3,8 @@
 ######################################################################
 QT += core gui
 TEMPLATE = app
-TARGET = remarkable-touchgestures
+DESTDIR = bin
+TARGET = touchinjector
 CONFIG   += c++11
 INCLUDEPATH += .
 
