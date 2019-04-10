@@ -45,4 +45,4 @@ systemctl enable touch (to enable on boot).
 
 **Note**
 
-Had to reference QT for UI feedback, but the executable is now 1mb (10kb in C) and take 10x more memory (10mb vs 1mb), will be removed when I find the time to add direct fb operations
+Had to reference QT for UI feedback, but the executable is now 1mb (10kb in C) and takes 10x more memory (10mb vs 1mb), will be removed when I find the time to add direct fb operations
