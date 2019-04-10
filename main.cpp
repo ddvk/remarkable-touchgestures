@@ -7,8 +7,9 @@
 #include <math.h>
 #include <stdbool.h>
 #include "ui.h"
+#include "version.h"
+#include <ctime>
 
-#define VERSION "0.0.2-qt"
 #define TOUCHSCREEN "/dev/input/event1"
 #define BUTTONS "/dev/input/event2"
 #define WACOM "/dev/input/event0"
@@ -53,12 +54,20 @@ struct Finger {
     bool state; //0 unused, 1 used
 };
 
+enum Gesture {Tap, TwoFingerTap,TwoFingerWide, SwipeLeft, SwipeRight, SwipeUp,SwipeDown};
+
+bool touch_enabled = false;
+
 //fd
 int buttons;
 void myemit(Key code){
     struct input_event key_input_event;
     memset(&key_input_event, 0, sizeof(key_input_event));
     int f = buttons; //TODO: global vars
+
+    //todo: fix global var
+    if (!touch_enabled)
+        return;
 
     debug_print("emitting %d \n", code);
 
@@ -84,7 +93,6 @@ void myemit(Key code){
     write(f, &key_input_event,sizeof(key_input_event));
 }
 
-bool touch_enabled = false;
 int keys_down = 0;
 int segment_count = 0;
 bool multi_touch = 0;
@@ -129,50 +137,54 @@ void process_finger(struct TouchEvent *f){
                 dx = p->end.x - p->start.x;
                 dy = p->end.y - p->start.y;
 
-                if (touch_enabled){
-                    if (abs(dx) < JITTER &&
+                if (abs(dx) < JITTER &&
                         abs(dy) < JITTER){
 
-                        int nav_stripe = SCREEN_WIDTH /3;
-						if (y > 100){//disable upper stripe 
-							if (x < nav_stripe) { 
-								if (y > SCREEN_HEIGHT - 150 && x < 150) {
-									printf("TOC\n");
-								}
-								else {
-									printf("Back\n");
-									myemit(Left);
-								}
-							}
-							else if (x > nav_stripe*2) {
-								printf("Next\n");
-								myemit(Right);
-							}
-						}
-                    }
-                    else {
-                        //swipe 
-                        if (abs(dx) > abs(dy)) {
-                            //horizontal
-                            if (dx < 0) {
-                                printf("swipe left\n");
-                                //todo: output gestures, extract executer
-                                myemit(Right);
+                    int nav_stripe = SCREEN_WIDTH /3;
+                    if (y > 100){//disable upper stripe 
+                        if (x < nav_stripe) { 
+                            if (y > SCREEN_HEIGHT - 150 && x < 150) {
+                                printf("TOC\n");
                             }
                             else {
-                                printf("swipe right\n");
+                                printf("Back\n");
                                 myemit(Left);
                             }
                         }
+                        else if (x > nav_stripe*2) {
+                            printf("Next\n");
+                            myemit(Right);
+                        }
+                    }
+                }
+                else {
+                    //swipe 
+                    if (abs(dx) > abs(dy)) {
+                        //horizontal
+                        if (dx < 0) {
+                            printf("swipe left\n");
+                            //todo: output gestures, extract executer
+                            myemit(Right);
+                        }
                         else {
-                            //vertical
-							if (dy > 0 && dy > 600) {
-								//down
-								myemit(Power);
-							}
-							else if (dy < 0 && dy < -600) {
-								myemit(Home);
-							}
+                            printf("swipe right\n");
+                            myemit(Left);
+                        }
+                    }
+                    else {
+                        //vertical
+                        if (dy > 0 && dy > 600) {
+                            //down
+                            myemit(Power);
+                        }
+                        else if (dy < 0 && dy < -600) {
+                            //todo: move
+                            time_t rawtime;
+                            time(&rawtime);
+                            tm* timeinfo = localtime(&rawtime);
+                            char buffer[100];
+                            strftime(buffer,100, "%Y-%m-%d %H:%M:%S", timeinfo);
+                            show(buffer);
                         }
                     }
                 }

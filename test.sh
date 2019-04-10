@@ -4,7 +4,7 @@ then
     DEVICE=root@remarkable
 fi
 
-make &&
+make  || exit 1
 ssh $DEVICE killall touchinjector ||
 scp bin/touchinjector $DEVICE:~/ && 
 ssh -tt $DEVICE '/home/root/touchinjector'

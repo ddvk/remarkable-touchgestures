@@ -4,8 +4,9 @@
 #include <epframebuffer.h>
 #include "ui.h"
 
-
+//segfault if it does not exist
 QGuiApplication *app;
+
 void ui_init(){
 	qputenv("QMLSCENE_DEVICE", "epaper");
     qputenv("QT_QPA_PLATFORM", "epaper:enable_fonts");
