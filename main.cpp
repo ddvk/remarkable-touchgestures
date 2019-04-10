@@ -147,12 +147,10 @@ void process_finger(struct TouchEvent *f){
                                 printf("TOC\n");
                             }
                             else {
-                                printf("Back\n");
                                 myemit(Left);
                             }
                         }
                         else if (x > nav_stripe*2) {
-                            printf("Next\n");
                             myemit(Right);
                         }
                     }
@@ -205,6 +203,7 @@ void process_finger(struct TouchEvent *f){
 						touch_enabled = true;
                     }
                 }
+                break;
             case 3:
                 printf("3 finger tap\n");
                 break;
