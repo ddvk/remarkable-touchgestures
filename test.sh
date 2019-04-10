@@ -1,6 +1,10 @@
 #!/bin/sh
-DEVICE=rm
-make &&
-ssh root@$DEVICE killall touchinjector ||
-scp bin/touchinjector root@$DEVICE:~/ && 
-ssh -tt root@$DEVICE '/home/root/touchinjector'
+if [ -z "$DEVICE" ]
+then
+    DEVICE=root@remarkable
+fi
+
+make  || exit 1
+ssh $DEVICE killall touchinjector ||
+scp bin/touchinjector $DEVICE:~/ && 
+ssh -tt $DEVICE '/home/root/touchinjector'
