@@ -6,6 +6,7 @@
 
 //segfault if it does not exist
 QGuiApplication *app;
+extern "C" {
 
 void ui_init(){
 	qputenv("QMLSCENE_DEVICE", "epaper");
@@ -13,9 +14,9 @@ void ui_init(){
     qputenv("QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS", "rotate=180");
 	qputenv("QT_QPA_GENERIC_PLUGINS", "evdevtablet");
 
-	char *argv []={};
-	int u = 0;
-	app = new QGuiApplication(u,argv); 
+	char *argv [0];
+	int argc = 0;
+	app = new QGuiApplication(argc,argv); 
 }
 
 void show(const char *str){
@@ -27,4 +28,5 @@ void show(const char *str){
 	painter.drawText(x,y, str);
 	painter.end();
 	EPFrameBuffer::sendUpdate(rect, EPFrameBuffer::Grayscale, EPFrameBuffer::PartialUpdate);
+}
 }

@@ -3,16 +3,17 @@
 ######################################################################
 system(./makeversion.sh) QMAKE_EXTRA_TARGETS += version
 PRE_TARGETDEPS += version.h
-QT += core gui
+QT = gui
 TEMPLATE = app
 DESTDIR = bin
 TARGET = touchinjector
 CONFIG   += c++11
 INCLUDEPATH += .
+QMAKE_CXXFLAGS_RELEASE = -fvisibility=hidden
 
 # Input
-SOURCES += main.cpp \ 
-			ui.cpp
+SOURCES += *.cpp
+SOURCES += *.c
 # FB stuff
 LIBS += -lqsgepaper
 

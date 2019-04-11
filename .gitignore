@@ -1,3 +1,5 @@
 bin/
 *.o
 Makefile
+.qmake.stash
+tags
