@@ -7,6 +7,7 @@
 #include "eventreader.h"
 #include "ui.h"
 
+static struct Finger fingers[MAX_SLOTS+1];
 void process_touch(void(*process)(struct TouchEvent *)){
     struct input_event evt;
 
@@ -17,7 +18,6 @@ void process_touch(void(*process)(struct TouchEvent *)){
     int width = TOUCH_WIDTH;
     int height = TOUCH_HEIGHT;
 
-    struct Finger fingers[MAX_SLOTS+1];
     memset(fingers,0,sizeof(fingers));
 
     int touchscreen = open(TOUCHSCREEN, O_RDONLY);
@@ -26,6 +26,8 @@ void process_touch(void(*process)(struct TouchEvent *)){
         exit(1);
     }
 
+    //todo: async
+
     while(read(touchscreen,&evt, sizeof(evt))){
         if (evt.type == EV_ABS) {
             if (evt.code == ABS_MT_SLOT) {
@@ -33,11 +35,10 @@ void process_touch(void(*process)(struct TouchEvent *)){
                 if (slot >= MAX_SLOTS){
                     slot = MAX_SLOTS-1;
                 }
-                if (fingers[slot].state){
+                if (fingers[slot].status){
                     fingers[slot].status = Move;
                 } 
                 else {
-                    fingers[slot].state = 1;
                     fingers[slot].status = Down;
                 }
             }
@@ -56,17 +57,16 @@ void process_touch(void(*process)(struct TouchEvent *)){
             } 
             else if (evt.code == ABS_MT_TRACKING_ID && evt.value == -1) {
                 /* printf("slot %d tracking %d\n",slot, evt.value); */
-                if (fingers[slot].state) {
+                if (fingers[slot].status) {
                     fingers[slot].status = Up;
                 }
             } 
             else if (evt.code == ABS_MT_TRACKING_ID) {
                 if (slot == 0) {
                     /* printf("TRACK\n"); */
-                    fingers[slot].state = 1;
                     fingers[slot].status = Down;
                 }
-                if (fingers[slot].state) {
+                if (fingers[slot].status) {
                     fingers[slot].track_id = evt.value;
                 }
             }
@@ -79,7 +79,7 @@ void process_touch(void(*process)(struct TouchEvent *)){
             struct Finger *f;
             for (int i=0;i< MAX_SLOTS;i++){
                 f = &fingers[i];
-                if (f->state) {
+                if (f->status) {
 
                     struct TouchEvent event;
                     event.time = evt.time.tv_sec;
@@ -97,7 +97,7 @@ void process_touch(void(*process)(struct TouchEvent *)){
                     } 
 
                     if (f->status == Up){
-                        f->state = 0;
+                        f->status = Untracked;;
                     }
 
                 }

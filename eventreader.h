@@ -1,6 +1,6 @@
 #pragma once
 #include <stdbool.h>
-enum FingerStatus {Down=0,Up=1,Move=2};
+enum FingerStatus {Untracked=0,Down,Up,Move};
 
 struct Point {
     int x,y;
@@ -21,6 +21,6 @@ struct Finger {
 	int raw_y;
     enum FingerStatus status;
     int track_id;
-    bool state; //0 unused, 1 used
 };
+
 void process_touch(void(*process)(struct TouchEvent *));
