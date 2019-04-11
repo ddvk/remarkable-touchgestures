@@ -1,7 +1,6 @@
-# Prototype
+# Touch gestures
 
-Enable page turning with the touch screen by emulatig button presses
-Map actions to gestures (in progress)
+Enables page turning with the touch screen by emulatig hardware button presses
 
 
 ## Features
@@ -13,7 +12,9 @@ swipe up to show current time (by default UTC, timezone info needs to be set on 
 *when enabled*:
 
 swipe left/right to turn pages
+
 touch left/right 1/3 of the screen to turn pages
+
 swipe down to enter sleep mode
 
 
@@ -42,7 +43,10 @@ systemctl start touch
 systemctl enable touch (to enable on boot).
 ```
 
+## TODO
+- [ ] Config
+- [ ] framebuffer
 
 **Note**
 
-Had to reference QT for UI feedback, but the executable is now 1mb (10kb in C) and take 10x more memory (10mb vs 1mb), will be removed when I find the time to add direct fb operations
+Had to reference QT for UI feedback, but the executable is now 1mb (10kb in C) and takes 10x more memory (10mb vs 1mb), will be removed when I find the time to add direct fb operations
