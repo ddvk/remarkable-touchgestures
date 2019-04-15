@@ -3,10 +3,19 @@
 #include <memory.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdbool.h>
 #include <linux/input.h>
 #include "eventreader.h"
 #include "ui.h"
 
+struct Finger {
+    int x;
+    int y;
+	int raw_x;
+	int raw_y;
+    enum FingerStatus status;
+    int track_id;
+};
 static struct Finger fingers[MAX_SLOTS+1];
 void process_touch(void(*process)(struct TouchEvent *)){
     struct input_event evt;
@@ -33,7 +42,7 @@ void process_touch(void(*process)(struct TouchEvent *)){
             if (evt.code == ABS_MT_SLOT) {
                 slot = evt.value;
                 if (slot >= MAX_SLOTS){
-                    slot = MAX_SLOTS-1;
+                    slot = MAX_SLOTS; //sink
                 }
                 if (fingers[slot].status){
                     fingers[slot].status = Move;

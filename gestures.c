@@ -5,17 +5,17 @@
 #include "ui.h"
 #include "gestures.h"
 #include "keyinjector.h"
-
-enum Key {Left=105, Right=106, Home=102,Power=116};
+#include "gesture_definition.h"
 
 static int keys_down = 0;
 static int segment_count = 0;
 
-struct Segment { 
+static struct Segment { 
     struct Point start;
     struct Point end;
 };
-struct Segment segments[MAX_SLOTS+1];
+
+static struct Segment segments[MAX_SLOTS+1];
 
 void recognize_gestures(struct TouchEvent *f) {
     int slot = f->slot;
@@ -41,6 +41,7 @@ void recognize_gestures(struct TouchEvent *f) {
         //todo: extract gesture recognition
 
         if(keys_down == 0){
+            struct Gesture gesture;
             struct Segment *p = segments;
             int dx,dy,distance=0;
             switch(segment_count){
@@ -60,11 +61,14 @@ void recognize_gestures(struct TouchEvent *f) {
                                     printf("TOC\n");
                                 }
                                 else {
-                                    myemit(Left);
+
+                                    gesture.type = TapLeft; 
+                                    interpred_gesture(&gesture);
                                 }
                             }
                             else if (x > nav_stripe*2) {
-                                myemit(Right);
+                                    gesture.type = TapRight; 
+                                    interpred_gesture(&gesture);
                             }
                         }
                     }
@@ -75,27 +79,24 @@ void recognize_gestures(struct TouchEvent *f) {
                             if (dx < 0) {
                                 printf("swipe left\n");
                                 //todo: output gestures, extract executer
-                                myemit(Right);
+                                    gesture.type = SwipeLeft; 
+                                    interpred_gesture(&gesture);
                             }
                             else {
                                 printf("swipe right\n");
-                                myemit(Left);
+                                gesture.type = SwipeRight; 
+                                interpred_gesture(&gesture);
                             }
                         }
                         else {
                             //vertical
                             if (dy > 0 && dy > 600) {
-                                //down
-                                myemit(Power);
+                                gesture.type = SwipeDownLong; 
+                                interpred_gesture(&gesture);
                             }
                             else if (dy < 0 && dy < -600) {
-                                //todo: move
-                                time_t rawtime;
-                                time(&rawtime);
-                                struct tm* timeinfo = localtime(&rawtime);
-                                char buffer[100];
-                                strftime(buffer,sizeof(buffer), "%Y-%m-%d %H:%M:%S", timeinfo);
-                                show(buffer);
+                                gesture.type = SwipeUpLong;
+                                interpred_gesture(&gesture);
                             }
                         }
                     }
@@ -104,24 +105,13 @@ void recognize_gestures(struct TouchEvent *f) {
                     dx = segments[0].end.x - segments[1].end.x;
                     dy = segments[0].end.y - segments[1].end.y;
                     distance = sqrt(dx*dx+dy*dy);
-                    if (distance > 500) {
-                        if (touch_enabled){
-                            show("touch navigation disabled");
-                            printf("disabling\n");
-                            touch_enabled = false;
-                        }
-                        else {
-                            show("touch navigation enabled");
-                            printf("enabling\n");
-                            touch_enabled = true;
-                        }
+                    if (distance > TWOTAP_DISTANCE) {
+                        gesture.type = TwoTapWide;
+                        interpred_gesture(&gesture);
                     }
                     break;
-                case 3:
-                    printf("3 finger tap\n");
-                    break;
-                case 4:
-                    printf("4\n");
+                default:
+                    printf("%d finger tap\n",segment_count);
                     break;
             }
             segment_count=0;

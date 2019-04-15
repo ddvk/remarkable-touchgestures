@@ -6,6 +6,7 @@ PRE_TARGETDEPS += version.h
 QT = gui
 TEMPLATE = app
 DESTDIR = bin
+OBJECTS_DIR = obj
 TARGET = touchinjector
 CONFIG   += c++11
 INCLUDEPATH += .

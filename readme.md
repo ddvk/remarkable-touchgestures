@@ -44,9 +44,7 @@ systemctl enable touch (to enable on boot).
 ```
 
 ## TODO
-- [ ] Config
-- [ ] framebuffer
+- [ ] make it configurable
+- [ ] framebuffer in C/libremarkable
+- [ ] draw primitives by injecting pen input (lines, rectangles)
 
-**Note**
-
-Had to reference QT for UI feedback, but the executable is now 1mb (10kb in C) and takes 10x more memory (10mb vs 1mb), will be removed when I find the time to add direct fb operations

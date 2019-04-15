@@ -3,3 +3,4 @@ bin/
 Makefile
 .qmake.stash
 tags
+obj/
