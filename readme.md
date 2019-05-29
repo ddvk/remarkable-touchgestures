@@ -5,9 +5,9 @@ Enables page turning with the touch screen by emulatig hardware button presses
 
 ## Features
 
-touch with 2 finger around 10cm apart to enable/disable
+touch with 2 fingers, around 8cm apart to enable/disable
 
-swipe up to show current time (by default UTC, timezone info needs to be set on the device)
+swipe down to show current time (by default UTC, timezone info needs to be set on the device)
 
 *when enabled*:
 
@@ -15,7 +15,8 @@ swipe left/right to turn pages
 
 touch left/right 1/3 of the screen to turn pages
 
-swipe down to enter sleep mode
+swipe up to enter sleep mode
+
 
 
 ## Compilation
