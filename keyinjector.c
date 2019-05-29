@@ -33,7 +33,7 @@ void press_button(int code);
 void press_pen(int x, int y, long time);
 void move_pen(int x, int y, long time);
 
-void interpred_gesture(struct Gesture *g){
+void interpret_gesture(struct Gesture *g){
     if (g->type == TwoTapWide) {
         if (touch_enabled){
             show("touch navigation disabled");
@@ -45,6 +45,7 @@ void interpred_gesture(struct Gesture *g){
             printf("enabling\n");
             touch_enabled = true;
         }
+		return;
     }
 
     time_t rawtime;
@@ -58,10 +59,6 @@ void interpred_gesture(struct Gesture *g){
             show(buffer);
             }
             break;
-        case SwipeUpLong:
-            printf("power\n");
-            press_button(Power);
-            break;
 
         default:
             break;
@@ -71,7 +68,7 @@ void interpred_gesture(struct Gesture *g){
     if (!touch_enabled)
         return;
 
-    //require touch
+    //require touch enabled
     switch(g->type){
         case TapLeft:
         case SwipeRight:
@@ -81,12 +78,18 @@ void interpred_gesture(struct Gesture *g){
         case SwipeLeft:
             press_button(Right);
             break;
+        case SwipeUpLong:
+            printf("power\n");
+            press_button(Power);
+            break;
         default:
             break;
 
     }
 }
 
+
+//todo: wip
 void move_pen(int x, int y, long time)
 {
     struct input_event key_input_event;

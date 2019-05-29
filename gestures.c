@@ -63,12 +63,12 @@ void recognize_gestures(struct TouchEvent *f) {
                                 else {
 
                                     gesture.type = TapLeft; 
-                                    interpred_gesture(&gesture);
+                                    interpret_gesture(&gesture);
                                 }
                             }
                             else if (x > nav_stripe*2) {
                                     gesture.type = TapRight; 
-                                    interpred_gesture(&gesture);
+                                    interpret_gesture(&gesture);
                             }
                         }
                     }
@@ -80,23 +80,23 @@ void recognize_gestures(struct TouchEvent *f) {
                                 printf("swipe left\n");
                                 //todo: output gestures, extract executer
                                     gesture.type = SwipeLeft; 
-                                    interpred_gesture(&gesture);
+                                    interpret_gesture(&gesture);
                             }
                             else {
                                 printf("swipe right\n");
                                 gesture.type = SwipeRight; 
-                                interpred_gesture(&gesture);
+                                interpret_gesture(&gesture);
                             }
                         }
                         else {
                             //vertical
                             if (dy > 0 && dy > 600) {
                                 gesture.type = SwipeDownLong; 
-                                interpred_gesture(&gesture);
+                                interpret_gesture(&gesture);
                             }
                             else if (dy < 0 && dy < -600) {
                                 gesture.type = SwipeUpLong;
-                                interpred_gesture(&gesture);
+                                interpret_gesture(&gesture);
                             }
                         }
                     }
@@ -107,7 +107,7 @@ void recognize_gestures(struct TouchEvent *f) {
                     distance = sqrt(dx*dx+dy*dy);
                     if (distance > TWOTAP_DISTANCE) {
                         gesture.type = TwoTapWide;
-                        interpred_gesture(&gesture);
+                        interpret_gesture(&gesture);
                     }
                     break;
                 default:

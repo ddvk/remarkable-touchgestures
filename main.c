@@ -8,7 +8,7 @@
 
 
 
-int main(int argc, char *argv[]) {
+int main() {
     printf("touchinjector %s\n",VERSION);
 
     injector_init(); 
