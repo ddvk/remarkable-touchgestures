@@ -10,7 +10,7 @@
 static int keys_down = 0;
 static int segment_count = 0;
 
-static struct Segment { 
+struct Segment { 
     struct Point start;
     struct Point end;
 };

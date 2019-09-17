@@ -7,9 +7,11 @@
 #include "keyinjector.h"
 
 
-
+bool verbose = false;
 int main() {
     printf("touchinjector %s\n",VERSION);
+    //todo: option parsing
+    verbose = true; 
 
     injector_init(); 
 	ui_init();

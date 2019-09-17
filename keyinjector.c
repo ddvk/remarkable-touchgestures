@@ -29,6 +29,7 @@ void injector_init() {
     /* } */
 }
 
+extern bool verbose;
 void press_button(int code);
 void press_pen(int x, int y, long time);
 void move_pen(int x, int y, long time);
@@ -37,12 +38,14 @@ void interpret_gesture(struct Gesture *g){
     if (g->type == TwoTapWide) {
         if (touch_enabled){
             show("touch navigation disabled");
-            printf("disabling\n");
+            if (verbose)
+                printf("disabling\n");
             touch_enabled = false;
         }
         else {
             show("touch navigation enabled");
-            printf("enabling\n");
+            if(verbose)
+                printf("enabling\n");
             touch_enabled = true;
         }
 		return;
@@ -79,8 +82,9 @@ void interpret_gesture(struct Gesture *g){
             press_button(Right);
             break;
         case SwipeUpLong:
-            printf("power\n");
-            press_button(Power);
+            if (verbose)
+                printf("execute custom script\n");
+            system("~/scripts/swipeup.sh");
             break;
         default:
             break;

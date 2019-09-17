@@ -5,6 +5,7 @@ Description=touch injector
 After=home.mount
 
 [Service]
+Environment=HOME=/home/root
 ExecStart=/home/root/touchinjector
 
 [Install]
