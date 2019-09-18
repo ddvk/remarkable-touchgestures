@@ -32,6 +32,16 @@ make
 
 ## Installation
 
+### Easy
+ssh to the device
+
+paste the following code
+```
+wget https://raw.githubusercontent.com/ddvk/remarkable-touchgestures/master/install.sh -O- |sh
+```
+
+### Manual
+
 copy touch.service to /etc/systemd/system/
 
 copy touchinjector to /home/root/
