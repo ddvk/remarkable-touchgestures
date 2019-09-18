@@ -9,6 +9,7 @@
 #include "keyinjector.h"
 #include "gestures.h"
 #include "gesture_definition.h"
+#include "config.h"
 
 enum Key {Left=105, Right=106, Home=102,Power=116};
 

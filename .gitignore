@@ -4,3 +4,4 @@ Makefile
 .qmake.stash
 tags
 obj/
+*.user

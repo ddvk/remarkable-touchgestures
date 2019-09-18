@@ -6,6 +6,8 @@
 #include "gestures.h"
 #include "keyinjector.h"
 #include "gesture_definition.h"
+#include "eventreader.h"
+#include "config.h"
 
 static int keys_down = 0;
 static int segment_count = 0;
@@ -104,7 +106,7 @@ void recognize_gestures(struct TouchEvent *f) {
                 case 2:
                     dx = segments[0].end.x - segments[1].end.x;
                     dy = segments[0].end.y - segments[1].end.y;
-                    distance = sqrt(dx*dx+dy*dy);
+                    distance = (int)sqrt(dx*dx+dy*dy);
                     if (distance > TWOTAP_DISTANCE) {
                         gesture.type = TwoTapWide;
                         interpret_gesture(&gesture);

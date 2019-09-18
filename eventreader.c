@@ -7,6 +7,7 @@
 #include <linux/input.h>
 #include "eventreader.h"
 #include "ui.h"
+#include "config.h"
 
 struct Finger {
     int x;
@@ -106,7 +107,7 @@ void process_touch(void(*process)(struct TouchEvent *)){
                     } 
 
                     if (f->status == Up){
-                        f->status = Untracked;;
+                        f->status = Untracked;
                     }
 
                 }
