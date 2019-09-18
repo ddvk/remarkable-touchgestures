@@ -15,7 +15,7 @@ swipe left/right to turn pages
 
 touch left/right 1/3 of the screen to turn pages
 
-swipe up to enter sleep mode
+swipe up - to execute a hardcoded script `~/scripts/swipeup.sh`
 
 
 
