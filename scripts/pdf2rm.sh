@@ -35,7 +35,7 @@ then
 fi
 
 # Link the file
-ln ${tmpdir}/${uuid}.pdf "$fullname" 
+ln "$fullname" ${tmpdir}/${uuid}.pdf
 
 # Add metadata
 # The lastModified item appears to contain the date in milliseconds since Epoch
