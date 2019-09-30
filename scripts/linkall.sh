@@ -1,5 +1,5 @@
 #!/bin/sh
 for f in *.pdf;
 do
-	rm2pdf $f
+	pdf2rm "$f"
 done
