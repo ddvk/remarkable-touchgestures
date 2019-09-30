@@ -19,7 +19,7 @@ tmpdir=$xochitldir
 
 # reMarkable documents appear to be identified by universally unique IDs (UUID),
 # so we generate one for the document at hand
-uuid=$(uuidgen)
+uuid=$(</proc/sys/kernel/random/uuid)
 fullname=$(realpath "$1")
 pdfname=$(basename "$1")
 extension="${pdfname##*.}"
