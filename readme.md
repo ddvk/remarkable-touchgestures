@@ -5,18 +5,19 @@ Enables page turning with the touch screen by emulatig hardware button presses
 
 ## Features
 
-**touch with 2 fingers**, around 8cm apart to enable/disable
+**touch with 2 fingers**, around 8cm apart to toggle between SwipeOnly, SwipeAndTouch or Disabled
 
-**swipe down** to show current time (by default UTC, timezone info needs to be set on the device, overwrite /etc/localtime)
+**swipe down** to show the current time (by default UTC, timezone info needs to be set on the device, overwrite /etc/localtime)
 
-*when enabled*:
+*when SwipeOnly*:
 
 **swipe left/right** to turn pages
 
-**touch left/right** 1/3 of the screen to turn pages (except upper 100 px where the toolbar usually is)
-
 **swipe up**  to execute a hardcoded script `~/scripts/swipeup.sh`
 
+*when SwipeAndTouch*:
+
+**touch left/right** 1/3 of the screen to turn pages (except upper and left 100 px where the toolbar usually is)
 
 
 ## Compilation
@@ -24,7 +25,7 @@ Enables page turning with the touch screen by emulatig hardware button presses
 install the dev tools from remarkable
 
 ```bash
-source /opt/poky/2.1.3/environment-setup-cortexa9hf-neon-poky-linux-gnueabi
+source /usr/local/oecore-x86_64/environment-setup-cortexa9hf-neon-oe-linux-gnueabi
 qmake
 make
 ```
