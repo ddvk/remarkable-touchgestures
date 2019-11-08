@@ -8,7 +8,7 @@ struct TouchEvent{
 	struct Point position;
 	struct Point raw_position;
 
-    long time;
+    unsigned long time;
     enum FingerStatus status;
 };
 

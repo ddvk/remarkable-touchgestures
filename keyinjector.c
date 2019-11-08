@@ -12,8 +12,8 @@
 #include "config.h"
 
 enum Key {Left=105, Right=106, Home=102,Power=116};
-
-static bool touch_enabled = false;
+enum TouchStatus {SwipeOnly, SwipeAndTouch,Disabled};
+static enum TouchStatus touch_status = SwipeOnly;
 int f;
 int w;
 void injector_init() {
@@ -37,18 +37,18 @@ void move_pen(int x, int y, long time);
 
 void interpret_gesture(struct Gesture *g){
     if (g->type == TwoTapWide) {
-        if (touch_enabled){
-            show("touch navigation disabled");
-            if (verbose)
-                printf("disabling\n");
-            touch_enabled = false;
-        }
-        else {
-            show("touch navigation enabled");
-            if(verbose)
-                printf("enabling\n");
-            touch_enabled = true;
-        }
+		touch_status = ((int)touch_status + 1) % 3; //cycle the states
+		switch(touch_status) {
+			case SwipeOnly:
+				show("swipe only");
+				break;
+			case Disabled:
+				show("touch disabled");
+				break;
+			case SwipeAndTouch:
+				show("swipe and touch");
+				break;
+		}
 		return;
     }
 
@@ -69,16 +69,22 @@ void interpret_gesture(struct Gesture *g){
 
     }
 
-    if (!touch_enabled)
+    if (touch_status == Disabled)
         return;
 
     //require touch enabled
     switch(g->type){
         case TapLeft:
+			if(touch_status != SwipeAndTouch)
+				break;
+			// fall through
         case SwipeRight:
             press_button(Left);
             break;
         case TapRight:
+			if(touch_status != SwipeAndTouch)
+				break;
+			// fall through
         case SwipeLeft:
             press_button(Right);
             break;

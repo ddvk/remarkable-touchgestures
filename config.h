@@ -12,5 +12,6 @@
 #define WACOM "/dev/input/event0"
 
 #define MAX_SLOTS 7  //max touch points to track
-#define TWOTAP_DISTANCE 700 //distance between the fingers to enable disable
-#define JITTER 20 //finger displacement to be consideded a swipe
+#define TWOTAP_DISTANCE 900 //distance between the fingers to enable disable
+#define JITTER 10 //finger displacement to be consideded a swipe
+#define SWIPE_VELOCITY 4 //swipe speed threshold

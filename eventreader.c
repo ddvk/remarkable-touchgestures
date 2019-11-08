@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include <stdlib.h>
 #include <memory.h>
 #include <unistd.h>
@@ -91,8 +92,10 @@ void process_touch(void(*process)(struct TouchEvent *)){
                 f = &fingers[i];
                 if (f->status) {
 
+					struct timespec tv;
+					clock_gettime(CLOCK_MONOTONIC, &tv);
                     struct TouchEvent event;
-                    event.time = evt.time.tv_sec;
+                    event.time = tv.tv_sec*1000+ tv.tv_nsec /1000000;
                     event.slot = i; //enumerating slots
                     event.x = f->x;
                     event.y = f->y;

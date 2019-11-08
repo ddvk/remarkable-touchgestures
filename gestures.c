@@ -27,6 +27,7 @@ void recognize_gestures(struct TouchEvent *f) {
         if(keys_down < 0) keys_down = 0; //todo: fixit
         segments[slot].start.x = f->x;
         segments[slot].start.y = f->y;
+        segments[slot].start.time = f->time;
 
         keys_down++;
         segment_count++;
@@ -39,6 +40,7 @@ void recognize_gestures(struct TouchEvent *f) {
         keys_down--;
         segments[slot].end.x = x;
         segments[slot].end.y = y;
+        segments[slot].end.time = f->time;
 
         //todo: extract gesture recognition
 
@@ -46,24 +48,27 @@ void recognize_gestures(struct TouchEvent *f) {
             struct Gesture gesture;
             struct Segment *p = segments;
             int dx,dy,distance=0;
+			unsigned long dt;
             switch(segment_count){
+
                 //single tap
                 case 1: 
                     printf("Tap  x:%d, y:%d  raw_x:%d, raw_y:%d\n", f->x, f->y, f->raw_position.x, f->raw_position.y);
                     dx = p->end.x - p->start.x;
                     dy = p->end.y - p->start.y;
+					dt = p->end.time - p->start.time;
+					printf("delta dt %lu\n", dt);
+					distance = (int)sqrt(dx*dx+dy*dy);
 
-                    if (abs(dx) < JITTER &&
-                            abs(dy) < JITTER){
+                    if (distance < JITTER) {
 
                         int nav_stripe = SCREEN_WIDTH /3;
-                        if (y > 100){//disable upper stripe 
+                        if (y > 100 && x > 100){//disable upper stripe and left menus
                             if (x < nav_stripe) { 
                                 if (y > SCREEN_HEIGHT - 150 && x < 150) {
                                     printf("TOC\n");
                                 }
                                 else {
-
                                     gesture.type = TapLeft; 
                                     interpret_gesture(&gesture);
                                 }
@@ -75,14 +80,17 @@ void recognize_gestures(struct TouchEvent *f) {
                         }
                     }
                     else {
+						unsigned int velo = (10*distance) / (dt == 0 ? 1 : dt);
+						printf("velocity %d\n", velo);
+						if (velo < SWIPE_VELOCITY) //ignore slow swipes
+							break;
                         //swipe 
                         if (abs(dx) > abs(dy)) {
                             //horizontal
                             if (dx < 0) {
                                 printf("swipe left\n");
-                                //todo: output gestures, extract executer
-                                    gesture.type = SwipeLeft; 
-                                    interpret_gesture(&gesture);
+								gesture.type = SwipeLeft; 
+								interpret_gesture(&gesture);
                             }
                             else {
                                 printf("swipe right\n");
