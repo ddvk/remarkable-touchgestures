@@ -5,7 +5,7 @@ Enables page turning with the touch screen by emulatig hardware button presses
 
 ## Features
 
-**touch with 2 fingers**, around 8cm apart to toggle between SwipeOnly, SwipeAndTouch or Disabled
+**touch with 2 fingers**, around 10-11cm apart to toggle between SwipeOnly, SwipeAndTouch or Disabled
 
 **swipe down** to show the current time (by default UTC, timezone info needs to be set on the device, overwrite /etc/localtime)
 
