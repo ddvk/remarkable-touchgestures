@@ -19,6 +19,29 @@ struct Segment {
 
 static struct Segment segments[MAX_SLOTS+1];
 
+int get_distance(struct Point *start, struct Point *end, int *angle, unsigned int *velocity){
+    int dx = end->x - start->x;
+    int dy = end->y - start->y;
+    unsigned long dt = end->time - start->time;
+
+    //todo: fix the math
+    if (abs(dx) > abs(dy)) {
+        if (dx > 0)
+            *angle=0;
+        else
+            *angle=180;
+    }
+    else {
+        if (dy > 0)
+            *angle=270;
+        else
+            *angle=90;
+    }
+    int distance =(int) sqrt(dx*dx+dy*dy);
+    *velocity = (10*distance) / (dt == 0 ? 1 : dt);
+    return distance; 
+}
+
 void recognize_gestures(struct TouchEvent *f) {
     int slot = f->slot;
     if (f->status == Down){
@@ -47,21 +70,16 @@ void recognize_gestures(struct TouchEvent *f) {
         if(keys_down == 0){
             struct Gesture gesture;
             struct Segment *p = segments;
-            int dx,dy,distance=0;
-			unsigned long dt;
+            int angle,distance,distance1=0;
+            unsigned int velocity=0;
             switch(segment_count){
 
                 //single tap
                 case 1: 
                     printf("Tap  x:%d, y:%d  raw_x:%d, raw_y:%d\n", f->x, f->y, f->raw_position.x, f->raw_position.y);
-                    dx = p->end.x - p->start.x;
-                    dy = p->end.y - p->start.y;
-					dt = p->end.time - p->start.time;
-					printf("delta dt %lu\n", dt);
-					distance = (int)sqrt(dx*dx+dy*dy);
+                    distance = get_distance(&p->start,&p->end,&angle,&velocity);
 
                     if (distance < JITTER) {
-
                         int nav_stripe = SCREEN_WIDTH /3;
                         if (y > 100 && x > 100){//disable upper stripe and left menus
                             if (x < nav_stripe) { 
@@ -80,48 +98,61 @@ void recognize_gestures(struct TouchEvent *f) {
                         }
                     }
                     else {
-						unsigned int velo = (10*distance) / (dt == 0 ? 1 : dt);
-						printf("velocity %d\n", velo);
-						if (velo < SWIPE_VELOCITY) //ignore slow swipes
-							break;
+                        printf("velocity %d\n", velocity);
+                        if (velocity < SWIPE_VELOCITY) //ignore slow swipes
+                            break;
                         //swipe 
-                        if (abs(dx) > abs(dy)) {
-                            //horizontal
-                            if (dx < 0) {
-                                printf("swipe left\n");
-								gesture.type = SwipeLeft; 
-								interpret_gesture(&gesture);
-                            }
-                            else {
+                        switch(angle) {
+                            case 0:
                                 printf("swipe right\n");
                                 gesture.type = SwipeRight; 
                                 interpret_gesture(&gesture);
-                            }
-                        }
-                        else {
-                            //vertical
-                            if (dy > 0 && dy > 600) {
-                                gesture.type = SwipeDownLong; 
+                                break;
+                            case 180:
+                                printf("swipe left\n");
+                                gesture.type = SwipeLeft; 
                                 interpret_gesture(&gesture);
-                            }
-                            else if (dy < 0 && dy < -600) {
-                                gesture.type = SwipeUpLong;
+                                break;
+                            case 90:
+                                if (distance > LONG_SWIPE) 
+                                    gesture.type = SwipeUpLong;
+                                else
+                                    gesture.type = SwipeUp;
+
                                 interpret_gesture(&gesture);
-                            }
+                                break;
+                            case 270:
+                                if (distance > LONG_SWIPE)
+                                    gesture.type = SwipeDownLong; 
+                                else
+                                    gesture.type = SwipeDown; 
+
+                                interpret_gesture(&gesture);
+                                break;
+                            default:
+                                fprintf(stderr,"unknown angle: %d\n", angle);
+                                break;
                         }
                     }
                     break;
                 case 2:
-                    dx = segments[0].end.x - segments[1].end.x;
-                    dy = segments[0].end.y - segments[1].end.y;
-                    distance = (int)sqrt(dx*dx+dy*dy);
-                    if (distance > TWOTAP_DISTANCE) {
+                    distance1 = get_distance(&segments[0].start, &segments[1].start, &angle, &velocity);
+                    distance = get_distance(&segments[0].end, &segments[1].end, &angle, &velocity);
+
+                    int distance_delta = distance - distance1; //zoom in, out
+                    if (distance > TWOTAP_DISTANCE && abs(distance_delta) < JITTER) {
+                        printf("change mode\n");
                         gesture.type = TwoTapWide;
                         interpret_gesture(&gesture);
+                        break;
+                    }
+                    //pinch zoom out
+                    if (distance_delta > 0) {
+                        break;
                     }
                     break;
                 default:
-                    printf("%d finger tap\n",segment_count);
+                    printf("%d finger\n",segment_count);
                     break;
             }
             segment_count=0;
