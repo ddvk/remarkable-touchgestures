@@ -56,6 +56,8 @@ systemctl enable touch (to enable on boot).
 ```
 
 ## TODO
+- [ ] fix/setup the CI
+- [ ] add unit tests
 - [ ] make it configurable
 - [ ] framebuffer in C/libremarkable
 - [ ] draw primitives by injecting pen input (lines, rectangles)
