@@ -12,17 +12,21 @@
 #include "config.h"
 
 enum Key {Left=105, Right=106, Home=102,Power=116};
-enum TouchStatus {SwipeOnly, SwipeAndTouch,Disabled};
-static enum TouchStatus touch_status = SwipeOnly;
-int f;
-int w;
+
+enum TouchStatus {Disabled, SwipeAndTouch};
+
+static enum TouchStatus touch_status = Disabled;
+
+
+static int f;
+static int w;
 void injector_init() {
     f = open(BUTTONS,O_WRONLY);
     if (!f){
         fprintf(stderr, "cannot open buttons");
         exit(1);
     }
-    
+
     /* w = open(WACOM, O_WRONLY); */
     /* if (!w){ */
     /*     fprintf(stderr, "cannot open digitizer"); */
@@ -37,24 +41,21 @@ void move_pen(int x, int y, long time);
 
 void interpret_gesture(struct Gesture *g){
     if (g->type == TwoTapWide) {
-		touch_status = ((int)touch_status + 1) % 3; //cycle the states
-		switch(touch_status) {
-			case SwipeOnly:
-				show("swipe only");
-				break;
-			case Disabled:
-				show("touch disabled");
-				break;
-			case SwipeAndTouch:
-				show("swipe and touch");
-				break;
-		}
-		return;
+        touch_status = ((int)touch_status + 1) % 2; //cycle the states
+        switch(touch_status) {
+            case Disabled:
+                show("touch disabled");
+                break;
+            case SwipeAndTouch:
+                show("touch and gestures");
+                break;
+        }
+        return;
     }
 
     time_t rawtime;
     time(&rawtime);
-    switch(g->type){
+    switch(g->type) {
         case SwipeDownLong:
             {
             struct tm* timeinfo = localtime(&rawtime);
@@ -75,17 +76,14 @@ void interpret_gesture(struct Gesture *g){
     //require touch enabled
     switch(g->type){
         case TapLeft:
-			if(touch_status != SwipeAndTouch)
-				break;
-			// fall through
-        case SwipeRight:
+            if(touch_status != SwipeAndTouch)
+                break;
             press_button(Left);
             break;
         case TapRight:
-			if(touch_status != SwipeAndTouch)
-				break;
-			// fall through
-        case SwipeLeft:
+            if(touch_status != SwipeAndTouch)
+                break;
+            // fall through
             press_button(Right);
             break;
         case SwipeUpLong:
