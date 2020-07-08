@@ -75,7 +75,7 @@ void interpret_gesture(struct Gesture *g){
 
     //require touch enabled
     switch(g->type){
-        case Gestures:
+        case SwipeUpLong:
             if (verbose)
                 printf("execute custom script\n");
             system("~/scripts/swipeup.sh");
