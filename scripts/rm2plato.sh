@@ -3,6 +3,8 @@
 set -e
 dest=${1:-~/documents}
 folder=/home/root/.local/share/remarkable/xochitl/
+#delete all links
+find "$dest" -type l -exec rm {} \;
 for f in $folder/*pdf
 do
     filename=$(basename -- "$f") 

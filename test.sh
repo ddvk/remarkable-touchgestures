@@ -1,7 +1,7 @@
 #!/bin/sh
 if [ -z "$DEVICE" ]
 then
-    DEVICE=root@remarkable
+    DEVICE=rm
 fi
 
 make  || exit 1

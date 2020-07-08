@@ -11,9 +11,9 @@
 #include "gesture_definition.h"
 #include "config.h"
 
-enum Key {Left=105, Right=106, Home=102,Power=116};
+enum Key {Left=105, Right=106, Home=102,Power=116, Up=103, Down=108, Esc=1};
 
-enum TouchStatus {Disabled, SwipeAndTouch};
+enum TouchStatus {Disabled, Gestures};
 
 static enum TouchStatus touch_status = Disabled;
 
@@ -46,8 +46,8 @@ void interpret_gesture(struct Gesture *g){
             case Disabled:
                 show("touch disabled");
                 break;
-            case SwipeAndTouch:
-                show("touch and gestures");
+            case Gestures:
+                show("gestures enabled");
                 break;
         }
         return;
@@ -75,18 +75,7 @@ void interpret_gesture(struct Gesture *g){
 
     //require touch enabled
     switch(g->type){
-        case TapLeft:
-            if(touch_status != SwipeAndTouch)
-                break;
-            press_button(Left);
-            break;
-        case TapRight:
-            if(touch_status != SwipeAndTouch)
-                break;
-            // fall through
-            press_button(Right);
-            break;
-        case SwipeUpLong:
+        case Gestures:
             if (verbose)
                 printf("execute custom script\n");
             system("~/scripts/swipeup.sh");
