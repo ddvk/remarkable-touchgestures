@@ -14,7 +14,9 @@ int main() {
     verbose = true; 
 
     injector_init(); 
+#ifdef REMARKABLE1
 	ui_init();
+#endif
 
     process_touch(&recognize_gestures);
 

@@ -1,9 +1,10 @@
+#include "ui.h"
+#include "config.h"
+#include <stdio.h>
+#ifdef REMARKABLE1
 #include <QGuiApplication>
 #include <QPainter>
 #include <QImage>
-#include "ui.h"
-#include "config.h"
-#ifdef REMARKABLE
 #include <epframebuffer.h>
 //segfault if it does not exist
 static QGuiApplication *app=nullptr;
@@ -11,7 +12,7 @@ static QGuiApplication *app=nullptr;
 
 extern "C" {
     void ui_init(){
-    #ifdef REMARKABLE
+    #ifdef REMARKABLE1
         qputenv("QMLSCENE_DEVICE", "epaper");
         qputenv("QT_QPA_PLATFORM", "epaper:enable_fonts");
         qputenv("QT_QPA_EVDEV_TOUCHSCREEN_PARAMETERS", "rotate=180");
@@ -25,7 +26,7 @@ extern "C" {
 
     void show(const char *str){
 
-    #ifdef REMARKABLE
+    #ifdef REMARKABLE1
         QPainter painter(EPFrameBuffer::framebuffer());
         int x = SCREEN_WIDTH / 3;
         int y = SCREEN_HEIGHT - 20;

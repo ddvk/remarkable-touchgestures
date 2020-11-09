@@ -15,7 +15,7 @@ enum Key {Left=105, Right=106, Home=102,Power=116, Up=103, Down=108, Esc=1};
 
 enum TouchStatus {Disabled, Gestures};
 
-static enum TouchStatus touch_status = Disabled;
+static enum TouchStatus touch_status = Gestures;
 
 
 static int f;
@@ -41,16 +41,7 @@ void move_pen(int x, int y, long time);
 
 void interpret_gesture(struct Gesture *g){
     if (g->type == TwoTapWide) {
-        touch_status = ((int)touch_status + 1) % 2; //cycle the states
-        switch(touch_status) {
-            case Disabled:
-                show("touch disabled");
-                break;
-            case Gestures:
-                show("gestures enabled");
-                break;
-        }
-        return;
+        show("2 Tap Wide");
     }
 
     time_t rawtime;

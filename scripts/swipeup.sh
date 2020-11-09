@@ -15,9 +15,13 @@ if [ -f $DRAFT_PID ]; then
     killall plato
     killall edit
     killall draft
+    killall remarkable-shutdown
     systemctl start xochitl
 else
     systemctl stop xochitl
-    ~/draft &
+    /home/root/scripts/ui.sh &
+    sleep 2
+    export LD_PRELOAD=/home/root/librm2fb_client.so.1.0.0
+    /home/root/apps/draft &
     echo $! > $DRAFT_PID
 fi
