@@ -8,20 +8,14 @@ if [ -f $DRAFT_PID ]; then
 	fi
     pid=$(cat $DRAFT_PID)
     rm $DRAFT_PID
-    kill $pid
+    kill -9 -$pid
     #todo find a better way
-    killall chess
-    killall fingerterm
-    killall plato
-    killall edit
-    killall draft
     killall remarkable-shutdown
     systemctl start xochitl
 else
     systemctl stop xochitl
-    /home/root/scripts/ui.sh &
+    LD_PRELOAD=/home/root/librm2fb_server.so.1.0.0 /usr/bin/remarkable-shutdown &
     sleep 2
-    export LD_PRELOAD=/home/root/librm2fb_client.so.1.0.0
-    /home/root/apps/draft &
+    LD_PRELOAD=/home/root/librm2fb_client.so.1.0.0 setsid /home/root/apps/draft &
     echo $! > $DRAFT_PID
 fi

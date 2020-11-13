@@ -73,7 +73,7 @@ void process_touch(void(*process)(struct TouchEvent *)){
                 fingers[slot].raw_y = evt.value;
             } 
             else if (evt.code == ABS_MT_TRACKING_ID && evt.value == -1) {
-                /* printf("slot %d tracking %d\n",slot, evt.value); */
+                printf("slot %d tracking %d\n",slot, evt.value);
                 if (fingers[slot].status) {
                     fingers[slot].status = Up;
                 }

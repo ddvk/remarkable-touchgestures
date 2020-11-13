@@ -27,4 +27,4 @@
 #define TWOTAP_DISTANCE 900 //distance between the fingers to enable disable
 #define JITTER 10 //finger displacement to be consideded a swipe
 #define SWIPE_VELOCITY 6 //swipe speed threshold
-#define LONG_SWIPE 600 //long swipe distance
+#define LONG_SWIPE 1400 //long swipe distance
